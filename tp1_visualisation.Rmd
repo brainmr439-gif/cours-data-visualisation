@@ -1,0 +1,119 @@
+---
+title: "Tout savoir sur ggplot"
+author: "YAPI YAPO - AMANI MOILLET"
+date: "2026-09-26"
+output: html_document
+---
+#activité sur l'utilité de ggplot sur titanic
+#1-creation d'un graphique 
+pour la creation d'un graphique l'utilisation de geom_xxx() est primordial , pour de amples explication nous allons proceder à un petit
+#a-chargement des packages pour le travail 
+```{r}
+library(titanic)
+library(ggplot2)
+```
+#b-configuration du graph avec ggplot
+```{r}
+ggplot(data = titanic_train, aes(x = Fare)) + geom_histogram(bins = 30, fill = "red", color = "white")
+```
+
+#creation avec ggplot2 worldcup 
+```{r}
+library(ggplot2)
+library(faraway)
+```
+
+#Generer le nuage de point
+```{r}
+ggplot(data = worldcup, aes(x = Time, y = Passes)) + 
+  geom_point(color = "firebrick", alpha = 0.7)
+```
+```{r}
+```
+#voir la table concernant world cup 
+
+```{r}
+View(worldcup)
+```
+#faire un dataframe des joueurs grand nombre de passe ou de tir 
+# 1. Charger l'extension nécessaire pour manipuler les données
+
+```{r}
+library(dplyr)
+library(faraway)
+```
+
+# 2. Trouver le joueur avec le maximum de Passes
+```{r}
+meilleur_passeur <- worldcup %>% 
+  slice_max(Passes, n = 1)
+```
+# 3. Trouver le joueur avec le maximum de Buts (Shots correspond aux tirs, Goals aux buts)
+```{r}
+meilleur_buteur <- worldcup %>% 
+  slice_max(Shots, n = 1)
+```
+
+# 4. Combiner les deux dans un seul dataframe avec la fonction de concaténation verticale
+```{r}
+les_meilleurs <- rbind(meilleur_passeur, meilleur_buteur)
+
+```
+# Afficher le résultat
+```{r}
+print(les_meilleurs)
+```
+```{r}
+```
+#creation de 2 nouvelles colones à la suite de celle-ci une qui prends les joueurs et un autre qui prend la concatenation du pays et du nom du joueur
+
+# 1. Transforme les noms de lignes invisibles en une vraie colonne "Joueur"
+
+
+```{r}
+les_meilleurs_complet <- les_meilleurs %>% 
+  # 1. Transforme les noms de lignes invisibles en une vraie colonne "Joueur"
+  tibble::rownames_to_column(var = "Joueur") %>% 
+  
+  # 2. Crée la colonne de concaténation (Nom du joueur - Pays)
+  mutate(Joueur_Pays = paste(Joueur, Team, sep = " - "))
+
+```
+
+# Afficher le nouveau tableau
+```{r}
+print(les_meilleurs_complet)
+```
+```{r}
+library(ggplot2)
+
+ggplot() +
+  # 1. Couche pour l'INTEGRALITE des joueurs (en petit et en gris transparent)
+  geom_point(data = worldcup, aes(x = Passes, y = Shots),shape = 3, 
+             color = "darkgrey", alpha = 0.4, size = 1.5) +
+  
+  # 2. Couche uniquement pour les DEUX MEILLEURS (gros points de couleur)
+  #geom_point(data = les_meilleurs_complet, aes(x = Passes, y = Shots, color = Joueur_Pays), 
+             #size = 4.5) +
+  
+  # 3. Ajouter le nom de nos deux meilleurs joueurs juste au-dessus de leurs points
+  geom_text(data = les_meilleurs_complet, aes(x = Passes, y = Shots, label = Joueur_Pays), 
+            vjust = -1.2, fontface = "bold", show.legend = FALSE) +
+  
+  # 4. Ajuster l'axe vertical pour que le nom de Gyan ne soit pas coupe tout en haut
+  ylim(0, 32) +
+  
+  # 5. Titres mis a jour sans accent pour eviter les bugs Windows
+  labs(
+    title = "Mondial : Nombre de Tirs en fonction des Passes",
+    subtitle = "Mise en valeur du meilleur passeur et du meilleur buteur",
+    x = "Nombre de Passes",
+    y = "Nombre de Tirs (Shots)",
+    color = "Meilleurs Joueurs"
+  ) +
+  theme_minimal()
+
+
+
+```
+
